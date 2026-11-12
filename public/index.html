@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ROYALS G.A.A.P. 2026 | Registration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="ornament ornament-tr" aria-hidden="true">✦ ❧ ✦</div><div class="ornament ornament-bl" aria-hidden="true">❧ ✦</div>
+<header class="site-header"><div class="seal">COL<br><span>✧</span><small>STI ILIGAN</small></div><div class="eyebrow">COUNCIL OF LEADERS PRESENTS</div><h1>ROYALS <span>G.A.A.P.</span></h1><p class="subtitle">GENERAL ASSEMBLY &amp; ACQUAINTANCE PARTY</p><div class="gold-rule"></div><p class="event-meta">DECEMBER 05, 2026 <i>✦</i> 5:00 PM</p><p class="venue">SKY ROOM · MARIA CRISTINA HOTEL<br>POBLACION, ILIGAN CITY</p></header>
+<main class="wrap">
+<section class="progress-card">
+  <div class="section-kicker">THE ROAD TO ROYALS</div><div class="progress-head"><div><strong id="total">—</strong><span> / 200 participants</span></div><span class="remaining" id="remaining">Loading count…</span></div>
+  <div class="meter"><div id="meterFill"></div></div><div class="meter-foot"><span id="percent">—</span><span>MINIMUM REQUIRED: 200</span></div>
+  <p id="thresholdMessage" class="threshold">Every registration brings the celebration closer.</p>
+</section>
+<section class="intro"><div class="section-kicker">YOUR INVITATION AWAITS</div><h2>Be part of the night.</h2><p>Register your participation in ROYALS G.A.A.P. 2026. Choose your academic level and provide your details below.</p></section>
+<section class="form-card" id="registration">
+  <div class="form-title"><span class="step">01</span><div><div class="section-kicker">REGISTRATION</div><h2>Reserve your place</h2></div></div>
+  <form id="registrationForm">
+    <label class="field-label">I am registering as</label>
+    <div class="choice-grid"><label class="choice"><input type="radio" name="division" value="college" required><span><b>COLLEGE</b><small>BSTM · BSIT</small></span></label><label class="choice"><input type="radio" name="division" value="senior_high"><span><b>SENIOR HIGH SCHOOL</b><small>GRADE 11 · GRADE 12</small></span></label></div>
+    <div class="form-grid">
+      <label class="field full"> <span>Full name <small>(Surname, First Name)</small></span><input name="fullName" maxlength="120" placeholder="e.g. Dela Cruz, Juan" required></label>
+      <label class="field"><span>Age</span><input name="age" type="number" min="10" max="100" placeholder="Your age" required></label>
+      <div class="field" id="courseWrap"><span>Course</span><select name="course"><option value="">Select course</option><option>BSTM</option><option>BSIT</option></select></div>
+      <div class="field hidden" id="yearWrap"><span>College year</span><select name="year"><option value="">Select year</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select></div>
+      <div class="field hidden" id="gradeWrap"><span>Grade level</span><select name="gradeLevel"><option value="">Select grade</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></div>
+      <div class="field hidden" id="strandWrap"><span>Strand</span><select name="strand"><option value="">Select strand</option></select></div>
+    </div>
+    <div class="conditions"><div class="section-kicker">PLEASE READ BEFORE REGISTERING</div><ul><li>The participation fee is <strong>₱600</strong>.</li><li>If you register but do not attend, the ₱600 fee is still payable.</li><li>Once registration is completed, backing out is not permitted.</li><li>At least 200 participants are required for the event to proceed. If the target is not reached, the event will be dissolved.</li></ul><p>Payment will be collected offline by the Council of Leaders. Registration does not mean payment has already been made.</p><label class="ack"><input type="checkbox" name="acknowledged" required><span>I have read and acknowledge the event conditions above.</span></label></div>
+    <button class="gold-button" type="submit" id="submitButton">COMPLETE REGISTRATION <span>✦</span></button><p class="form-status" id="formStatus" role="status"></p>
+  </form>
+</section>
+<section class="privacy-note"><strong>Privacy note</strong><p>Your details will be used by the Council of Leaders to organize and administer this event. Access to participant records is restricted to authorized organizers. Please contact the organizers if you need information about data handling or correction of your details.</p></section>
+</main>
+<footer>COUNCIL OF LEADERS · ROYALS G.A.A.P. 2026 <span>✦</span></footer>
+<script src="/app.js"></script>
+</body></html>
