@@ -12,3 +12,33 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;ba
     object-fit: contain;
     margin: 0 auto 14px;
 }
+
+/* Registration reminders */
+.conditions {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.conditions > p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 10px 0 16px;
+}
+
+.conditions ol {
+  padding-left: 22px;
+  margin: 16px 0;
+}
+
+.conditions ol li {
+  padding-left: 5px;
+  margin-bottom: 12px;
+}
+
+.conditions ol li strong {
+  font-weight: 700;
+}
+
+.conditions .ack {
+  margin-top: 18px;
+}
