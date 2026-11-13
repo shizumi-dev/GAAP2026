@@ -2,7 +2,7 @@ const form = document.getElementById("registrationForm");
 const statusEl = document.getElementById("formStatus");
 const submitButton = document.getElementById("submitButton");
 const $ = (name) => form.elements[name];
-const strands = { "11":["ASSH","BE","CUART","ICT","STEM"], "12":["MAWD","CUART","HUMSS","STEM","ABM"] };
+const strands = { "11":["ASSH","BE","CUACT","ICTCT","STEM"], "12":["MAWD","CUART","HUMSS","STEM","ABM"] };
 
 function setVisible(id, visible) { document.getElementById(id).classList.toggle("hidden", !visible); }
 function updateFields() {
