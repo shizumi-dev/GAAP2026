@@ -50,7 +50,17 @@ form.addEventListener("submit", async e => {
   submitButton.disabled = true; submitButton.textContent = "SAVING REGISTRATION…";
   try {
     const response = await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    const result = await response.json();
+    const responseText = await response.text();
+
+let result;
+
+try {
+    result = responseText ? JSON.parse(responseText) : {};
+} catch {
+    result = {
+        error: responseText || "Unexpected server response."
+    };
+}
     if (!response.ok) throw new Error(result.error || "Registration failed.");
     statusEl.textContent = `Registration recorded successfully. Your reference number is #${result.registrationId}. Please coordinate offline payment with the Council of Leaders.`;
     form.reset(); updateFields(); await refreshStats();
