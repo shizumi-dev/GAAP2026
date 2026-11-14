@@ -28,8 +28,16 @@ app.use(session({
 }));
 app.use(express.static(path.join(__dirname, "public")));
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 8, standardHeaders: "draft-7", legacyHeaders: false });
-const COLLEGE_COURSES = ["BSTM", "BSIT"];
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: {
+    error: "Too many requests. Please wait a few minutes before trying again."
+  }
+});
+const COLLEGE_COURSES = ["BSTM", "BSIS"];
 const COLLEGE_YEARS = [1, 2, 3, 4];
 const SHS_STRANDS = { 11: ["ASSH", "BE", "CUART", "ICT", "STEM"], 12: ["MAWD", "CUART", "HUMSS", "STEM", "ABM"] };
 
