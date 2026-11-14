@@ -28,7 +28,40 @@ const $=id=>document.getElementById(id);
 async function api(url,options={}){const r=await fetch(url,options);const d=r.headers.get("content-type")?.includes("json")?await r.json():{};if(!r.ok)throw new Error(d.error||"Request failed");return d}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function groupMarkup(groups,division){const filtered=groups.filter(g=>g.division===division);if(!filtered.length)return '<p class="empty">No registrations yet.</p>';return filtered.map(g=>{const label=division==="college"?`${g.course} · Year ${g.college_year}`:`Grade ${g.grade_level} · ${g.strand}`;return `<div class="group"><b>${g.count}</b><small>${esc(label)}</small></div>`}).join("")}
-function recordMarkup(rows,division){const filtered=rows.filter(r=>r.division===division);if(!filtered.length)return '<tr><td colspan="6" class="empty">No participants registered yet.</td></tr>';return filtered.map(r=>{const paid=r.payment_status==="paid";const category=division==="college"?`Year ${r.college_year}`:`Grade ${r.grade_level}`;const course=division==="college"?r.course:r.strand;return `<tr><td>${esc(r.full_name)}</td><td>${r.age}</td><td>${esc(course)}</td><td>${esc(category)}</td><td>${esc(r.payment_status)}</td><td><button class="small-btn" data-id="${esc(r.id)}" data-status="${paid?"pending":"paid"}">${paid?"MARK PENDING":"MARK PAID"}</button></td></tr>`}).join("")}
+function recordMarkup(rows, division) {
+    const filtered = rows.filter(r => r.division === division);
+
+    if (!filtered.length) {
+        return '<tr><td colspan="6" class="empty">No participants registered yet.</td></tr>';
+    }
+
+    return filtered.map(r => {
+        const paid = r.payment_status === "paid";
+
+        const thirdColumn = division === "college"
+            ? r.course
+            : `Grade ${r.grade_level}`;
+
+        const fourthColumn = division === "college"
+            ? `Year ${r.college_year}`
+            : r.strand;
+
+        return `<tr>
+            <td>${esc(r.full_name)}</td>
+            <td>${esc(r.age)}</td>
+            <td>${esc(thirdColumn)}</td>
+            <td>${esc(fourthColumn)}</td>
+            <td>${esc(r.payment_status)}</td>
+            <td>
+                <button class="small-btn"
+                    data-id="${esc(r.id)}"
+                    data-status="${paid ? "pending" : "paid"}">
+                    ${paid ? "MARK PENDING" : "MARK PAID"}
+                </button>
+            </td>
+        </tr>`;
+    }).join("");
+}
 async function load(){const [s,rows]=await Promise.all([api("/api/admin/summary"),api("/api/admin/registrations")]);$("stats").innerHTML=[["TOTAL",s.stats.total],["COLLEGE",s.stats.college],["SENIOR HIGH",s.stats.seniorHigh],["TO 200",s.stats.remaining]].map(([a,b])=>`<div class="stat"><strong>${b}</strong><small>${a}</small></div>`).join("");$("collegeGroups").innerHTML=groupMarkup(s.groups,"college");$("shsGroups").innerHTML=groupMarkup(s.groups,"senior_high");$("collegeRecords").innerHTML=recordMarkup(rows,"college");$("shsRecords").innerHTML=recordMarkup(rows,"senior_high")}
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();try{await api("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:e.target.password.value})});$("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");await load()}catch(err){$("loginStatus").textContent=err.message}});
 $("logout").onclick=async()=>{await api("/api/admin/logout",{method:"POST"});location.reload()};
