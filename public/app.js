@@ -12,8 +12,10 @@ function updateFields() {
   const division = form.querySelector('input[name="division"]:checked')?.value;
   const college = division === "college";
   const shs = division === "senior_high";
+  const outsider = division === "outsider";
   setVisible("courseWrap", college); setVisible("yearWrap", college);
   setVisible("gradeWrap", shs); setVisible("strandWrap", shs && !!$("gradeLevel").value);
+  setVisible("outsiderWrap", outsider);
   $("course").required = college; $("year").required = college;
   $("gradeLevel").required = shs; $("strand").required = shs && !!$("gradeLevel").value;
 }
@@ -45,6 +47,7 @@ form.addEventListener("submit", async e => {
     year: division === "college" ? $("year").value : null,
     gradeLevel: division === "senior_high" ? $("gradeLevel").value : null,
     strand: division === "senior_high" ? $("strand").value : null,
+    wasStiStudent: division === "outsider" ? $("wasStiStudent").checked : false,
     acknowledged: $("acknowledged").checked
   };
   submitButton.disabled = true; submitButton.textContent = "SAVING REGISTRATION…";

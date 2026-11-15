@@ -45,11 +45,12 @@ async function countRows() {
   const { rows } = await pool.query(`
     SELECT COUNT(*)::int AS total,
       COUNT(*) FILTER (WHERE division='college')::int AS college,
-      COUNT(*) FILTER (WHERE division='senior_high')::int AS senior_high
+      COUNT(*) FILTER (WHERE division='senior_high')::int AS senior_high,
+      COUNT(*) FILTER (WHERE division='outsider')::int AS outsiders
     FROM registrations
   `);
   const total = rows[0].total;
-  return { total, college: rows[0].college, seniorHigh: rows[0].senior_high, target: 200, remaining: Math.max(0, 200-total), percent: Math.min(100, Math.round(total/200*100)), targetReached: total >= 200 };
+  return { total, college: rows[0].college, seniorHigh: rows[0].senior_high, outsiders: rows[0].outsiders, target: 200, remaining: Math.max(0, 200-total), percent: Math.min(100, Math.round(total/200*100)), targetReached: total >= 200 };
 }
 function requireAdmin(req,res,next) {
   if (req.session && req.session.isAdmin) return next();
@@ -67,18 +68,21 @@ function rowsToCsv(rows, kind) {
   else if (kind === "senior-high") headers = [...common, "Grade level", "Strand", ...payment];
   else if (kind === "college-categorized") headers = [...common, "Division", "Course", "College year", ...payment];
   else if (kind === "senior-high-categorized") headers = [...common, "Division", "Grade level", "Strand", ...payment];
-  else headers = [...common, "Division", "Course", "College year", "Grade level", "Strand", ...payment];
+  else if (kind === "outsider") headers = [...common, "STI student status", ...payment];
+  else headers = [...common, "Division", "Course", "College year", "Grade level", "Strand", "STI student status", ...payment];
 
   const lines = [headers.map(csvCell).join(",")];
   for (const r of rows) {
-    const division = r.division === "senior_high" ? "Senior High School" : "College";
+    const division = r.division === "senior_high" ? "Senior High School" : r.division === "outsider" ? "Outsider" : "College";
+    const stiStatus = r.was_sti_student ? "Ex-student" : "Not an ex-student";
     const registeredAt = new Date(r.created_at).toISOString();
     let values;
     if (kind === "college") values = [r.full_name, r.age, r.course, r.college_year, r.payment_status, registeredAt];
     else if (kind === "senior-high") values = [r.full_name, r.age, r.grade_level, r.strand, r.payment_status, registeredAt];
     else if (kind === "college-categorized") values = [r.full_name, r.age, division, r.course, r.college_year, r.payment_status, registeredAt];
     else if (kind === "senior-high-categorized") values = [r.full_name, r.age, division, r.grade_level, r.strand, r.payment_status, registeredAt];
-    else values = [r.full_name, r.age, division, r.course, r.college_year, r.grade_level, r.strand, r.payment_status, registeredAt];
+    else if (kind === "outsider") values = [r.full_name, r.age, stiStatus, r.payment_status, registeredAt];
+    else values = [r.full_name, r.age, division, r.course, r.college_year, r.grade_level, r.strand, r.division === "outsider" ? stiStatus : "", r.payment_status, registeredAt];
     lines.push(values.map(csvCell).join(","));
   }
   return "\uFEFF" + lines.join("\r\n");
@@ -99,6 +103,7 @@ app.post("/api/register", limiter, async (req,res) => {
   if (!Number.isInteger(age) || age < 10 || age > 100) return res.status(400).json({error:"Enter a valid age."});
   if (b.acknowledged !== true) return res.status(400).json({error:"Please acknowledge the event conditions before registering."});
   let course = null, collegeYear = null, gradeLevel = null, strand = null;
+  const wasStiStudent = division === "outsider" && b.wasStiStudent === true;
   if (division === "college") {
     course = b.course; collegeYear = Number(b.year);
     if (!COLLEGE_COURSES.includes(course) || !COLLEGE_YEARS.includes(collegeYear))
@@ -107,7 +112,7 @@ app.post("/api/register", limiter, async (req,res) => {
     gradeLevel = Number(b.gradeLevel); strand = b.strand;
     if (!SHS_STRANDS[gradeLevel] || !SHS_STRANDS[gradeLevel].includes(strand))
       return res.status(400).json({error:"Choose a valid grade level and strand."});
-  } else return res.status(400).json({error:"Choose College or Senior High School."});
+  } else if (division !== "outsider") return res.status(400).json({error:"Choose College, Senior High School, or Outsider."});
 
   const client = await pool.connect();
   try {
@@ -116,17 +121,18 @@ app.post("/api/register", limiter, async (req,res) => {
     const duplicate = await client.query(
       `SELECT id FROM registrations WHERE normalized_name=$1 AND age=$2 AND division=$3
        AND COALESCE(course,'')=COALESCE($4,'') AND COALESCE(college_year,0)=COALESCE($5,0)
-       AND COALESCE(grade_level,0)=COALESCE($6,0) AND COALESCE(strand,'')=COALESCE($7,'')`,
-      [normalizedName,age,division,course,collegeYear,gradeLevel,strand]
+       AND COALESCE(grade_level,0)=COALESCE($6,0) AND COALESCE(strand,'')=COALESCE($7,'')
+       AND COALESCE(was_sti_student,FALSE)=COALESCE($8,FALSE)`,
+      [normalizedName,age,division,course,collegeYear,gradeLevel,strand,wasStiStudent]
     );
     if (duplicate.rowCount) {
       await client.query("ROLLBACK");
       return res.status(409).json({error:"A matching registration already exists. Please contact the Council of Leaders if you believe this is a mistake."});
     }
     const inserted = await client.query(
-      `INSERT INTO registrations (full_name,normalized_name,age,division,course,college_year,grade_level,strand,conditions_acknowledged)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,TRUE) RETURNING id, created_at`,
-      [fullName,normalizedName,age,division,course,collegeYear,gradeLevel,strand]
+      `INSERT INTO registrations (full_name,normalized_name,age,division,course,college_year,grade_level,strand,was_sti_student,conditions_acknowledged)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,TRUE) RETURNING id, created_at`,
+      [fullName,normalizedName,age,division,course,collegeYear,gradeLevel,strand,wasStiStudent]
     );
     await client.query("COMMIT");
     res.status(201).json({ message:"Registration recorded.", registrationId: inserted.rows[0].id, stats: await countRows() });
@@ -152,10 +158,10 @@ app.get("/api/admin/summary", requireAdmin, async (req,res) => {
   try {
     const stats = await countRows();
     const { rows } = await pool.query(`
-      SELECT division, course, college_year, grade_level, strand,
+      SELECT division, course, college_year, grade_level, strand, was_sti_student,
         COUNT(*)::int AS count
-      FROM registrations GROUP BY division,course,college_year,grade_level,strand
-      ORDER BY division,grade_level,course,college_year,strand
+      FROM registrations GROUP BY division,course,college_year,grade_level,strand,was_sti_student
+      ORDER BY division,grade_level,course,college_year,strand,was_sti_student
     `);
     const payment = await pool.query(`SELECT payment_status,COUNT(*)::int AS count FROM registrations GROUP BY payment_status`);
     res.json({stats, groups:rows, payments:payment.rows});
@@ -163,7 +169,7 @@ app.get("/api/admin/summary", requireAdmin, async (req,res) => {
 });
 app.get("/api/admin/registrations", requireAdmin, async (req,res) => {
   try {
-    const { rows } = await pool.query("SELECT id,full_name,age,division,course,college_year,grade_level,strand,payment_status,created_at FROM registrations ORDER BY created_at DESC");
+    const { rows } = await pool.query("SELECT id,full_name,age,division,course,college_year,grade_level,strand,was_sti_student,payment_status,created_at FROM registrations ORDER BY created_at DESC");
     res.json(rows);
   } catch(e) { console.error(e); res.status(500).json({error:"Unable to load registrations."}); }
 });
@@ -177,14 +183,16 @@ app.patch("/api/admin/registrations/:id/payment", requireAdmin, async (req,res) 
 });
 app.get("/api/admin/export/:kind", requireAdmin, async (req,res) => {
   const kind = req.params.kind;
-  const allowed = ["college", "senior-high", "college-categorized", "senior-high-categorized", "bulk"];
+  const allowed = ["college", "senior-high", "outsider", "college-categorized", "senior-high-categorized", "bulk"];
   if (!allowed.includes(kind)) return res.status(404).end();
-  const division = kind.startsWith("college") ? "college" : kind.startsWith("senior-high") ? "senior_high" : null;
+  const division = kind.startsWith("college") ? "college" : kind.startsWith("senior-high") ? "senior_high" : kind === "outsider" ? "outsider" : null;
   const order = kind === "college" || kind === "college-categorized"
     ? "college_year,course,full_name"
     : kind === "senior-high" || kind === "senior-high-categorized"
       ? "grade_level,strand,full_name"
-      : "division,grade_level,course,college_year,strand,full_name";
+      : kind === "outsider"
+        ? "was_sti_student DESC,full_name"
+        : "division,grade_level,course,college_year,strand,was_sti_student,full_name";
   try {
     const query = division
       ? await pool.query(`SELECT * FROM registrations WHERE division=$1 ORDER BY ${order}`, [division])

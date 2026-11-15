@@ -20,7 +20,8 @@ A responsive registration website and private Council of Leaders dashboard.
 - Build command: `npm install`
 - Start command: `npm start`
 - Add environment variables from `.env.example`.
-- Run `schema.sql` once against the Supabase database before opening registration.
+- For a new database, run `schema.sql` once against Supabase.
+- For an existing database, run `migration_add_outsiders.sql` once in the Supabase SQL Editor before deploying the outsider feature. This preserves existing registrations.
 - Use a strong, unique `SESSION_SECRET` and `ADMIN_PASSWORD`.
 - Set `NODE_ENV=production`.
 
