@@ -28,13 +28,26 @@ app.use(session({
 }));
 app.use(express.static(path.join(__dirname, "public")));
 
-const limiter = rateLimit({
+// Registration traffic can come from many students sharing one school Wi-Fi
+// or mobile-network public IP. Keep a separate, higher registration allowance
+// while retaining a stricter limit for admin password attempts.
+const registrationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 30,
+  limit: 300,
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: {
-    error: "Too many requests. Please wait a few minutes before trying again."
+    error: "Too many registration attempts from this network. Please wait a few minutes and try again."
+  }
+});
+
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: {
+    error: "Too many login attempts. Please wait a few minutes before trying again."
   }
 });
 const COLLEGE_COURSES = ["BSTM", "BSIS"];
@@ -92,7 +105,7 @@ app.get("/api/stats", async (req,res) => {
   try { res.json(await countRows()); }
   catch (e) { console.error(e); res.status(500).json({error:"Unable to load registration count."}); }
 });
-app.post("/api/register", limiter, async (req,res) => {
+app.post("/api/register", registrationLimiter, async (req,res) => {
   const b = req.body || {};
   const fullName = String(b.fullName || "").trim().replace(/\s+/g, " ");
   const age = Number(b.age);
@@ -142,7 +155,7 @@ app.post("/api/register", limiter, async (req,res) => {
   } finally { client.release(); }
 });
 
-app.post("/api/admin/login", limiter, (req,res) => {
+app.post("/api/admin/login", adminLoginLimiter, (req,res) => {
   const password = String(req.body.password || "");
   if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD)
     return res.status(401).json({error:"Incorrect admin password."});

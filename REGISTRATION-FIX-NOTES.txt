@@ -1,0 +1,9 @@
+Registration reliability fixes
+1. Registration form now handles validation inside app.js and shows clear feedback.
+2. Hidden conditional fields are disabled so they cannot block form submission.
+3. Grade/strand choices are reset and synchronized when changing registration category.
+4. Registration has its own 300 requests / 15 minute IP limit to accommodate shared school networks.
+5. Admin login retains a separate stricter 10 attempts / 15 minute limit.
+6. Removed malformed empty acknowledgement markup from the conditions section.
+
+No database rows were changed. Keep your existing production environment variables and database.

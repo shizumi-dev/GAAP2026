@@ -19,7 +19,7 @@
 <section class="intro"><div class="section-kicker">YOUR INVITATION AWAITS</div><h2>Be part of the night.</h2><p>Register your participation in ROYALS G.A.A.P. 2026. Choose your registration category and provide your details below.</p></section>
 <section class="form-card" id="registration">
   <div class="form-title"><span class="step">01</span><div><div class="section-kicker">REGISTRATION</div><h2>Reserve your place</h2></div></div>
-  <form id="registrationForm">
+  <form id="registrationForm" novalidate>
     <label class="field-label">I am registering as</label>
     <div class="choice-grid"><label class="choice"><input type="radio" name="division" value="college" required><span><b>COLLEGE</b><small>BSTM · BSIS</small></span></label><label class="choice"><input type="radio" name="division" value="senior_high"><span><b>SENIOR HIGH SCHOOL</b><small>GRADE 11 · GRADE 12</small></span></label><label class="choice"><input type="radio" name="division" value="outsider"><span><b>OUTSIDER</b><small>OPEN TO NON-STI REGISTRANTS</small></span></label></div>
     <div class="form-grid">
@@ -37,30 +37,22 @@
     
 <div class="conditions">
   <div class="section-kicker">A FEW IMPORTANT REMINDERS BEFORE REGISTERING</div>
-
   <p>We’re excited to have you join us! Before completing your registration, kindly take a moment to read through these important reminders to help ensure a smooth and successful event for everyone.</p>
-
   <ol>
     <li><strong>Registration Fee:</strong> The registration fee is ₱600.00 per participant.</li>
-
     <li><strong>Commitment to Attend:</strong> We encourage everyone to register only if they are certain of their participation. Please note that those who register but are unable to attend will still be responsible for paying the ₱600.00 participation fee.</li>
-
     <li><strong>Confirmed Registration:</strong> Once your registration has been submitted, cancellations or withdrawals will no longer be accommodated. We kindly ask that you make sure of your availability before registering.</li>
-
     <li><strong>Minimum Number of Participants:</strong> For the event to proceed, we need at least 200 registered participants. If we are unable to reach this target, the event will unfortunately be cancelled.</li>
-
     <li><strong>Payment Schedule:</strong> Payments will be collected by the Council of Leaders at the Admissions Office from November 23–27, 2026.</li>
-
     <li><strong>Registration and Payment:</strong> Please remember that submitting the registration form does not mean that payment has already been made. Registration and payment are separate processes.</li>
   </ol>
-
   <p>Thank you for your understanding and cooperation! Your commitment and participation will help make this event possible and meaningful. We look forward to having you with us!</p>
-
-  <label class="ack">
-  </label>
 </div>
-<label class="ack"><input type="checkbox" name="acknowledged" required><span>I have read and acknowledged the event conditions and reminders above.</span></label></div>
-    <button class="gold-button" type="submit" id="submitButton">COMPLETE REGISTRATION <span>✦</span></button><p class="form-status" id="formStatus" role="status"></p>
+<label class="ack">
+  <input type="checkbox" name="acknowledged" required>
+  <span>I have read and acknowledged the event conditions and reminders above.</span>
+</label>
+<button class="gold-button" type="submit" id="submitButton">COMPLETE REGISTRATION <span>✦</span></button><p class="form-status" id="formStatus" role="status"></p>
   </form>
 
 </section>
